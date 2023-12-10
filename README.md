@@ -16,6 +16,10 @@ Each type can be selected via command-line arguments. The script allows insertio
 - Python 3.6 or higher
 - bchlib, math, numpy, argparse, hashlib Python packages
 
+- # To install the requirements:
+    ./install_requirements.sh
+    
+
 ## Usage
 
 Run the script from the command line by specifying the type of IBLT, its size, BCH polynomial, BCH bits, and the data to insert or delete.
