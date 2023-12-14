@@ -17,7 +17,7 @@ Each type can be selected via command-line arguments. The script allows insertio
 - bchlib, math, numpy, argparse, hashlib Python packages
 
 - # To install the requirements:
-    ./install_requirements.sh
+    sh install_requirements.sh
     
 
 ## Usage
