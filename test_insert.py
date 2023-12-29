@@ -7,8 +7,7 @@ def test_insert_method():
     iblt = BchIbltConstruction1(r, d)
 
     # Insert a test data string
-    test_data = "hello"
-    iblt.insert(test_data)
+    iblt.insert("hello")
     iblt.insert("world")
     iblt.insert("love")
     iblt.insert("like")

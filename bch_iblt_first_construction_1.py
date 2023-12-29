@@ -54,8 +54,17 @@ class BchIbltConstruction1:
         hash_bytes = hashlib.sha256(key_bytes).digest()
         return int.from_bytes(hash_bytes, byteorder='big') % self.size
 
+    def decode_data(self, encoded_data):
+        decoded_data_gf = self.bch.decode(encoded_data)
+        decoded_data_binary = decoded_data_gf.tolist()
+        decoded_data_bytes = bytes(int(''.join(map(str, decoded_data_binary[i:i+8])), 2) for i in range(0, len(decoded_data_binary), 8))
+        decoded_data = decoded_data_bytes.decode('utf-8', errors='ignore').rstrip('\x00')
+        return decoded_data
+
+
     def encode_data(self, data):
         # Convert data to binary format
+        # print(f" data to encode  {data}")
         data_bytes = str(data).encode() if not isinstance(data, bytes) else data
         data_binary = [int(bit) for byte in data_bytes for bit in format(byte, '08b')]
 
@@ -76,7 +85,7 @@ class BchIbltConstruction1:
         # Encode the data using the BCH encoder
         data_bch = self.bch.encode(data_gf)
         # print(f"Encoded data: {data_bch}")
-
+        # print(f"data_after decode {self.decode_data(np.array(data_bch, dtype=int))}")
         return np.array(data_bch, dtype=int)
 
     def insert(self, data):
@@ -95,68 +104,83 @@ class BchIbltConstruction1:
                 # print(f"Updated table at index {i}: {self.table[i]}")
         # print("Insertion completed.")
 
+    # def delete(self, data):
+    #     print(f"Deleting data: {data}")
+    #     encoded_data = self.encode_data(data)
+    #     data_hash = self.robust_hash_function(data)
+    #     data_hash = data_hash % self.Hg.shape[1]
+    #
+    #     # Decode the data for confirmation before deletion
+    #     cell_index = None
+    #     for i in range(self.size):
+    #         if self.Hg[i, data_hash] != 0:
+    #             try:
+    #                 decoded_data = self.bch.decode(self.bch.field(self.table[i]))
+    #                 decoded_bytes = bytearray(
+    #                     int(''.join(map(str, decoded_data)), 2).to_bytes((len(decoded_data) + 7) // 8, byteorder='big'))
+    #                 decoded_str = decoded_bytes.decode('utf-8', errors='ignore').rstrip('\x00')
+    #                 if decoded_str == data:
+    #                     cell_index = i
+    #                     break
+    #             except galois.GaloisException:
+    #                 continue
+    #
+    #     if cell_index is not None:
+    #         print(f"Found and deleting '{data}' at cell {cell_index}")
+    #         # Remove the encoded data from the appropriate cells
+    #         for i in range(self.size):
+    #             if self.Hg[i, data_hash] != 0:
+    #                 self.table[i] = (self.table[i] - encoded_data) % 2  # Assuming binary field
+    #     else:
+    #         print(f"Data '{data}' not found or could not be decoded for deletion")
+
     def delete(self, data):
         print(f"Deleting data: {data}")
         encoded_data = self.encode_data(data)
         data_hash = self.robust_hash_function(data)
         data_hash = data_hash % self.Hg.shape[1]
 
-        # Decode the data for confirmation before deletion
-        cell_index = None
         for i in range(self.size):
             if self.Hg[i, data_hash] != 0:
-                try:
-                    decoded_data = self.bch.decode(self.bch.field(self.table[i]))
-                    decoded_bytes = bytearray(
-                        int(''.join(map(str, decoded_data)), 2).to_bytes((len(decoded_data) + 7) // 8, byteorder='big'))
-                    decoded_str = decoded_bytes.decode('utf-8', errors='ignore').rstrip('\x00')
-                    if decoded_str == data:
-                        cell_index = i
-                        break
-                except galois.GaloisException:
-                    continue
-
-        if cell_index is not None:
-            print(f"Found and deleting '{data}' at cell {cell_index}")
-            # Remove the encoded data from the appropriate cells
-            for i in range(self.size):
-                if self.Hg[i, data_hash] != 0:
-                    self.table[i] = (self.table[i] - encoded_data) % 2  # Assuming binary field
-        else:
-            print(f"Data '{data}' not found or could not be decoded for deletion")
-
-    # def delete(self, data):
-    #     encoded_data = self.encode_data(data)
-    #     data_hash = self.robust_hash_function(data)
-    #     data_hash = data_hash % self.Hg.shape[1]
-    #
-    #     for i in range(self.size):
-    #         if self.Hg[i, data_hash] != 0:
-    #             self.table[i] = (self.table[i] - encoded_data) % 2  # Assuming binary field
-
+                self.table[i] = (self.table[i] - encoded_data) % 2  # Assuming binary field
     def list_entries(self):
         data_items = []
         for i, cell in enumerate(self.table):
             if np.any(cell):
                 print(f"Cell {i} has data: {cell}")
                 try:
-                    decoded_data = self.bch.decode(self.bch.field(cell))
-                    print(f"Raw decoded data at cell {i}: {decoded_data}")
+                    decoded_str = self.decode_data(cell)
+                    print(f"Decoded string at cell {i}: '{decoded_str}'")
 
-                    # Convert decoded data to bytes and then to string
-                    decoded_bytes = int(''.join(map(str, decoded_data.tolist())), 2).to_bytes(
-                        (len(decoded_data) + 7) // 8, byteorder='big')
-                    print(f"Decoded bytes at cell {i}: {decoded_bytes}")
-
-                    data_str = decoded_bytes.decode('utf-8', errors='ignore').rstrip('\x00')
-                    print(f"Decoded string at cell {i}: '{data_str}'")
-
-                    if data_str:
-                        data_items.append(data_str)
+                    if decoded_str:
+                        data_items.append(decoded_str)
                 except galois.GaloisException as e:
                     print(f"Decoding error at cell {i}: {e}")
         print(f"Listed Entries: {data_items}")
         return data_items
+    # def list_entries(self):
+    #     data_items = []
+    #     for i, cell in enumerate(self.table):
+    #         if np.any(cell):
+    #             print(f"Cell {i} has data: {cell}")
+    #             try:
+    #                 decoded_data = self.bch.decode(self.bch.field(cell))
+    #                 print(f"Raw decoded data at cell {i}: {decoded_data}")
+    #
+    #                 # Convert decoded data to bytes and then to string
+    #                 decoded_bytes = int(''.join(map(str, decoded_data.tolist())), 2).to_bytes(
+    #                     (len(decoded_data) + 7) // 8, byteorder='big')
+    #                 print(f"Decoded bytes at cell {i}: {decoded_bytes}")
+    #
+    #                 data_str = decoded_bytes.decode('utf-8', errors='ignore').rstrip('\x00')
+    #                 print(f"Decoded string at cell {i}: '{data_str}'")
+    #
+    #                 if data_str:
+    #                     data_items.append(data_str)
+    #             except galois.GaloisException as e:
+    #                 print(f"Decoding error at cell {i}: {e}")
+    #     print(f"Listed Entries: {data_items}")
+    #     return data_items
 
 
 
