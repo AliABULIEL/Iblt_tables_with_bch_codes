@@ -1,5 +1,5 @@
 import argparse
-from bch_iblt_first_construction_1 import BchIbltConstruction1
+from bch_iblt_construction_1 import BchIbltConstruction1
 
 def main():
     parser = argparse.ArgumentParser(description='IBLT Implementation with BCH Codes')

@@ -1,4 +1,4 @@
-from bch_iblt_first_construction_1 import BchIbltConstruction1
+from bch_iblt_construction_1 import BchIbltConstruction1
 r = 10  # Since 2^r - 1 = 1023, r should be 10
 d = 5
 # bch_iblt = BchIbltConstruction1(r, d)
