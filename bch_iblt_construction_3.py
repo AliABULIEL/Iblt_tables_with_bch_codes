@@ -125,6 +125,7 @@ class BchIbltConstruction3:
 
         for i in range(self.size):
             if self.Hc2[i, data_hash % self.Hc2.shape[1]] != 0:
+                encoded_data = np.resize(encoded_data, self.table[i].size)
                 self.table[i] = (self.table[i] + encoded_data) % 2
                 print(f"Updating cell {i}")
         print(f"Data '{data}' successfully inserted.")
@@ -135,6 +136,7 @@ class BchIbltConstruction3:
 
         for i in range(self.size):
             if self.Hc2[i, data_hash % self.Hc2.shape[1]] != 0:
+                encoded_data = np.resize(encoded_data, self.table[i].size)
                 self.table[i] = (self.table[i] - encoded_data) % 2
         print(f"Data '{data}' successfully deleted.")
 
