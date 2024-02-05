@@ -49,8 +49,8 @@ def print_table_with_decoding(table, bch_code):
         decoded_word = attempt_decode_data(cell, bch_code)
         print(f"Cell {i}: {cell} - Decoded Word: '{decoded_word}'")
 
-r = 10  # Since 2^r - 1 = 1023, r should be 10
-d = 5
+r = 5  # Since 2^r - 1 = 1023, r should be 10
+d = 2
 bch_iblt = BchIbltConstruction1(r, d)
 
 # List of test data strings
