@@ -38,6 +38,7 @@ class BchIbltConstruction2:
         # Use n0 directly as n
         n = n0
         adjusted_d = d
+        print(f"n0 = {n0}, d= {d}")
         while True:
             try:
                 bch_code = galois.BCH(n, d=adjusted_d)

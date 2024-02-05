@@ -1,7 +1,7 @@
 from bch_iblt_construction_2 import BchIbltConstruction2
 import galois
 r = 12  # Since 2^r - 1 = 1023, r should be 10
-d = 2
+d = 4
 bch_iblt = BchIbltConstruction2(r, d)
 #
 # test_data =  ["hello world", "world",  "hello", "tests"]
