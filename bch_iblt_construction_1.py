@@ -30,7 +30,8 @@ class BchIbltConstruction1:
                 break
             except ValueError:
                 adjusted_d -= 1
-                if adjusted_d == 0:
+                print(f' try to lower d {adjusted_d}')
+                if adjusted_d <= 0:
                     raise ValueError(f"No valid BCH code found for r = {r} and d = {d}")
         Hg = bch_code.H
         # Adjust Hg size if necessary (not directly shown here but implied)

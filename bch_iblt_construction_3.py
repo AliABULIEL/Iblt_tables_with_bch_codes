@@ -127,13 +127,12 @@ class BchIbltConstruction3:
             if self.Hc2[i, data_hash % self.Hc2.shape[1]] != 0:
                 encoded_data = np.resize(encoded_data, self.table[i].size)
                 self.table[i] = (self.table[i] + encoded_data) % 2
-                print(f"Updating cell {i}")
+                # print(f"Updating cell {i}")
         print(f"Data '{data}' successfully inserted.")
 
     def delete(self, data):
         encoded_data = self.encode_data(data)
         data_hash = self.robust_hash_function(data)
-
         for i in range(self.size):
             if self.Hc2[i, data_hash % self.Hc2.shape[1]] != 0:
                 encoded_data = np.resize(encoded_data, self.table[i].size)
@@ -143,7 +142,7 @@ class BchIbltConstruction3:
     def list_entries(self):
         data_items = []
         for i, cell in enumerate(self.table):
-            print(f"Cell {i} contents: {cell}")
+            # print(f"Cell {i} contents: {cell}")
             decoded_str = self.decode_data(cell)
             print(f"Decoded Word at Cell {i}: '{decoded_str}'")
             if decoded_str and decoded_str != "Undecodable or no data":
