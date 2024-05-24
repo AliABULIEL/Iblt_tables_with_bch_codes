@@ -139,10 +139,9 @@ class BchIbltConstruction2:
         encoded_data = np.resize(encoded_data, self.table.shape[1])
 
         for data_hash in data_hashes:
-            for i in range(self.size):
-                if not np.any(self.table[i]):
-                    self.table[i] = (self.table[i] + encoded_data) % 2
-                    print(f"Data '{data}' inserted at table index {i}.")
+            if not np.any(self.table[data_hash]):
+                    self.table[data_hash] = (self.table[data_hash] + encoded_data) % 2
+                    print(f"Data '{data}' inserted at table index {data_hash}.")
                     return  # Ensure only one cell is updated
         print(f"Failed to insert data '{data}': all hashed cells are occupied")
 
@@ -169,6 +168,7 @@ class BchIbltConstruction2:
             print(f"Decoded Word at Cell {i}: '{decoded_str}'")
             if decoded_str and decoded_str != "Undecodable or no data":
                 data_items.append(decoded_str)
+        print(f"List entries result is  {data_items}")
         return data_items
 
     def verify_size(self):
@@ -180,26 +180,4 @@ class BchIbltConstruction2:
         assert self.size <= bound, f"Size of the table exceeds the bound: {self.size} > {bound}"
         print(f"Table size {self.size} is within the bound {bound}")
 
-    def test_hash_function(self):
-        """
-        Test the robust hash function to ensure it produces consistent and uniformly distributed results.
-        """
-        test_keys = ["test1", "test2", "test3", "example data 1", "example data 2"]
-        hash_results = [self.multi_hash_function(key) for key in test_keys]
-        print(f"Hash results: {hash_results}")
-        return hash_results
 
-# Example usage
-if __name__ == "__main__":
-    r = 4  # Number of bits in each cell
-    d = 4  # Even minimum distance
-
-    iblt = BchIbltConstruction2(r, d)
-    iblt.insert("example data 1")
-    iblt.insert("example data 2")
-    iblt.delete("example data 1")
-    entries = iblt.list_entries()
-    print(f"Entries in the IBLT: {entries}")
-
-    # Test the hash function
-    iblt.test_hash_function()

@@ -1,4 +1,3 @@
-
 import galois
 import hashlib
 import numpy as np
@@ -14,8 +13,8 @@ class BchIbltConstruction3:
         self.Gc2 = self.create_Gc2()
         self.size = self.calculate_optimal_size()
         self.Hc2 = self.create_Hc2()
-        self.table = np.zeros((self.size, r), dtype=int)
-        print(f" optimal size {self.size}, {int(math.log2(2**self.r))}")
+        self.table = np.zeros((self.size, self.bch.n - 1), dtype=int)  # Adjusted to n-1 based on modified H
+        print(f"Optimal size: {self.size}, log2(n): {int(math.log2(2 ** self.r))}")
 
     def find_n0(self, r):
         n0 = 1
@@ -31,10 +30,7 @@ class BchIbltConstruction3:
 
     def create_Gc2(self):
         n0 = self.n0
-
-
-
-        alpha = galois.GF(2**self.r).primitive_element
+        alpha = galois.GF(2 ** self.r).primitive_element
 
         # Generate elements for Gc2 based on the pattern described in the article
         g_U = [alpha ** i for i in range(n0)]  # Upper part
@@ -42,7 +38,6 @@ class BchIbltConstruction3:
 
         # Combine g_U and g_L to form Gc2 according to the specific pattern
         Gc2 = np.vstack([g_U, np.zeros_like(g_U), g_L])
-
         return Gc2
 
     def create_Hc2(self):
@@ -51,50 +46,26 @@ class BchIbltConstruction3:
         Hc2 = np.tile(self.Gc2, (rows_to_repeat, 1))
         return Hc2[:self.size, :]
 
-
     def calculate_optimal_size(self):
         # Recalculate the size based on Construction 3 formula
         n = 2 ** self.r
-        # s_star = int(np.ceil((2 * n / (3 * np.sqrt(n) - 4))) * np.log2(n))
-        s_star = int(np.ceil((2 * n / (3 * np.sqrt(n) - 4))))
+        s_star = int(np.ceil((2 * n / (3 * np.sqrt(n) - 4))) + 1)
         return s_star
 
-    def robust_hash_function(self, key, hash1='sha256', hash2='md5'):
-        key_bytes = str(key).encode()
+    def robust_hash_function(self, key, seed=0):
+        key_bytes = (str(key) + str(seed)).encode()
+        hash_bytes = hashlib.sha256(key_bytes).digest()
+        hash_value = int.from_bytes(hash_bytes, byteorder='big') % self.size
+        return hash_value
 
-        # First hash function
-        hash1_bytes = hashlib.new(hash1, key_bytes).digest()
-        hash1_int = int.from_bytes(hash1_bytes, byteorder='big')
+    def multi_hash_function(self, key, num_hashes=5):
+        return [self.robust_hash_function(key, seed) for seed in range(num_hashes)]
 
-        # Second hash function
-        hash2_bytes = hashlib.new(hash2, key_bytes).digest()
-        hash2_int = int.from_bytes(hash2_bytes, byteorder='big')
-
-        # Combine hashes using double hashing technique
-        combined_hash = (hash1_int + hash2_int) % self.size
-        return combined_hash
-
-    # def encode_data(self, data):
-    #     # Convert data to binary format
-    #     data_bytes = str(data).encode()
-    #     data_binary = [int(bit) for byte in data_bytes for bit in format(byte, '08b')]
-    #
-    #     k = self.Hc2.shape[1]
-    #     # Adjust data length to match Hc2 matrix row size
-    #     if len(data_binary) > k:
-    #         data_binary = data_binary[:k]  # Truncate if longer
-    #     elif len(data_binary) < k:
-    #         data_binary += [0] * (k - len(data_binary))  # Pad if shorter
-    #
-    #     data_gf = data_binary
-    #     return np.array(data_gf, dtype=int)
     def encode_data(self, data):
-        # Convert data to binary format
         data_bytes = data.encode('utf-8')
         data_binary = [int(bit) for byte in data_bytes for bit in format(byte, '08b')]
 
         k = self.Hc2.shape[1]
-        # Adjust data length to match Hc2 matrix row size
         if len(data_binary) > k:
             data_binary = data_binary[:k]  # Truncate if longer
         elif len(data_binary) < k:
@@ -108,11 +79,9 @@ class BchIbltConstruction3:
             if len(encoded_data) > self.Hc2.shape[1]:
                 encoded_data = encoded_data[:self.Hc2.shape[1]]  # Trim to valid length
 
-            # Convert the encoded data back to binary bytes
             binary_bytes = ''.join(map(str, encoded_data.tolist()))
             byte_array = bytearray(int(binary_bytes[i:i + 8], 2) for i in range(0, len(binary_bytes), 8))
 
-            # Decode the binary bytes to a string
             decoded_str = byte_array.decode('utf-8', errors='ignore')
             return decoded_str if decoded_str else "Undecodable or no data"
         except Exception as e:
@@ -121,32 +90,35 @@ class BchIbltConstruction3:
 
     def insert(self, data):
         encoded_data = self.encode_data(data)
-        data_hash = self.robust_hash_function(data)
+        data_hashes = self.multi_hash_function(data)
 
-        for i in range(self.size):
-            if self.Hc2[i, data_hash % self.Hc2.shape[1]] != 0:
-                encoded_data = np.resize(encoded_data, self.table[i].size)
-                self.table[i] = (self.table[i] + encoded_data) % 2
-                # print(f"Updating cell {i}")
-        print(f"Data '{data}' successfully inserted.")
+        encoded_data = np.resize(encoded_data, self.table.shape[1])
+        for data_hash in data_hashes:
+            if not np.any(self.table[data_hash]):
+                self.table[data_hash] = (self.table[data_hash] + encoded_data) % 2
+                print(f"Data '{data}' inserted at table index {data_hash}.")
+                return
+        print(f"Failed to insert data '{data}': all hashed cells are occupied")
 
     def delete(self, data):
         encoded_data = self.encode_data(data)
-        data_hash = self.robust_hash_function(data)
-        for i in range(self.size):
-            if self.Hc2[i, data_hash % self.Hc2.shape[1]] != 0:
-                encoded_data = np.resize(encoded_data, self.table[i].size)
-                self.table[i] = (self.table[i] - encoded_data) % 2
-        print(f"Data '{data}' successfully deleted.")
+        data_hashes = self.multi_hash_function(data)
+
+        encoded_data = np.resize(encoded_data, self.table.shape[1])
+        for data_hash in data_hashes:
+            if np.array_equal(self.table[data_hash], encoded_data):
+                self.table[data_hash] = (self.table[data_hash] - encoded_data) % 2
+                print(f"Data '{data}' deleted from table index {data_hash}.")
+                return
+        print(f"Failed to delete data '{data}': no matching cell found")
 
     def list_entries(self):
         data_items = []
         for i, cell in enumerate(self.table):
-            # print(f"Cell {i} contents: {cell}")
             decoded_str = self.decode_data(cell)
             print(f"Decoded Word at Cell {i}: '{decoded_str}'")
-            if decoded_str and decoded_str != "Undecodable or no data":
-                data_items.append(decoded_str)
+            if decoded_str and decoded_str != "Undecodable or no data" and decoded_str.rstrip('\x00') !='':
+                data_items.append(decoded_str.rstrip('\x00'))
+        print(f"List entries result is  {data_items}")
         return data_items
-
 

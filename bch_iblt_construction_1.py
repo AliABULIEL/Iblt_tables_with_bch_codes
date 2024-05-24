@@ -127,6 +127,7 @@ class BchIbltConstruction1:
                         data_items.append(decoded_str)
                 except galois.GaloisException as e:
                     print(f"Decoding error at cell {i}: {e}")
+        print(f"list entries result is {data_items}")
         return data_items
 
 
