@@ -19,19 +19,20 @@ def test_encode_decode(bch_iblt, data_to_insert):
 
 def test_insert(bch_iblt, data_to_insert):
     for data in data_to_insert:
-        bch_iblt.insert("hello")
+        print(f"inserting {data}")
+        bch_iblt.insert(data)
         for i, cell in enumerate(bch_iblt.table):
             print(f"Cell {i}: {cell}")
-        bch_iblt.insert("world")
-        for i, cell in enumerate(bch_iblt.table):
-            print(f"Cell {i}: {cell}")
-        bch_iblt.insert("love")
-        bch_iblt.insert("like")
+        # bch_iblt.insert("world")
+        # for i, cell in enumerate(bch_iblt.table):
+            # print(f"Cell {i}: {cell}")
+        # bch_iblt.insert("love")
+        # bch_iblt.insert("like")
 
     # Show the updated table
-        print("Updated table:")
-        for i, cell in enumerate(bch_iblt.table):
-            print(f"Cell {i}: {cell}")
+    #     print("Updated table:")
+    #     for i, cell in enumerate(bch_iblt.table):
+    #         print(f"Cell {i}: {cell}")
     # bch_iblt.delete("love")
     # for i, cell in enumerate(bch_iblt.table):
     #     print(f"Cell {i}: {cell}")
@@ -58,25 +59,26 @@ def print_table_with_decoding(table, bch_code):
     for i, cell in enumerate(table):
         decoded_word = attempt_decode_data(cell, bch_code)
         print(f"Cell {i}: {cell} - Decoded Word: '{decoded_word}'")
-def test_iblt(bch):
+def test_iblt(bch, data_to_insert):
     # Insert each string into the IBLT
-    for data in test_data_list:
-        bch_iblt.insert(data)
+    for data in data_to_insert:
+        bch.insert(data)
         print(f"Inserted: {data}")
 
     # Print the table after all insertions
     print("\nTable after all insertions:")
-    print_table_with_decoding(bch_iblt.table, bch_iblt.bch)
+    print_table_with_decoding(bch.table, bch.bch)
 
     # Attempt to list entries from the IBLT
     print("\nAttempting to list entries from the IBLT:")
-    listed_entries = bch_iblt.list_entries()
+    listed_entries = bch.list_entries()
+    print(f"List entries result is  {listed_entries}")
 
     # Delete each string from the IBLT and print the table after each deletion
     for data in test_data_list[::-1]:
-        bch_iblt.delete(data)
+        bch.delete(data)
         print(f"\nTable after deleting '{data}':")
-        print_table_with_decoding(bch_iblt.table, bch_iblt.bch)
+        print_table_with_decoding(bch.table, bch.bch)
 
 
 if __name__ == '__main__':
@@ -102,7 +104,7 @@ if __name__ == '__main__':
     if args.all:
         # For each test function, create a new instance of the BCH IBLT
         for test_function in [test_encode_decode, test_insert, test_iblt]:
-            print(f"Running {test_function.__name__}")
+            print(f"Running {test_function}")
 
             # Adjust r and d based on type if not explicitly set
             if args.r == 0 or args.d == 0:
