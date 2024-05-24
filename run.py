@@ -49,7 +49,7 @@ class BCHIBLTShell(cmd.Cmd):
     def do_list(self, arg):
         'List entries: LIST'
         entries = self.bch_iblt.list_entries()
-        print(f"Entries in the IBLT: {entries}")
+        # print(f"Entries in the IBLT: {entries}")
 
     def do_exit(self, arg):
         'Exit the shell: EXIT'
