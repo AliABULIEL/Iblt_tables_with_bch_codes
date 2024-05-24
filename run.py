@@ -80,7 +80,14 @@ def test_iblt(bch, data_to_insert):
         print(f"\nTable after deleting '{data}':")
         print_table_with_decoding(bch.table, bch.bch)
 
-
+def test_hash_function(bch_table):
+        """
+        Test the robust hash function to ensure it produces consistent and uniformly distributed results.
+        """
+        test_keys = ["test1", "test2", "test3", "example data 1", "example data 2"]
+        hash_results = [bch_table.multi_hash_function(key) for key in test_keys]
+        print(f"Hash results: {hash_results}")
+        return hash_results
 if __name__ == '__main__':
     # Initialize argument parser
     parser = argparse.ArgumentParser(description="Test BCH IBLT Constructions")

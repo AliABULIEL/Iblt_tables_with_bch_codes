@@ -21,22 +21,17 @@ class BchIbltConstruction1:
         Adjusts d if necessary to find a valid BCH code.
         """
         n = 2 ** r - 1
-        n_prime = 1
-        while d * math.log2(n_prime + 1) <= r:
-            n_prime = (n_prime + 1) * 2 - 1
-
-        n_prime = n_prime // 2  # Largest power of 2 such that d log(n' + 1) <= r
-        adjusted_d = 2 * d + 1
+        adjusted_d = d
         while True:
             try:
-                bch_code = galois.BCH(n_prime + 1, d=adjusted_d)
+                bch_code = galois.BCH(n, d=adjusted_d)
                 break
             except ValueError:
                 adjusted_d -= 1
                 if adjusted_d <= 0:
                     raise ValueError(f"No valid BCH code found for r = {r} and d = {d}")
         Hg = bch_code.H
-        print(f"BCH parameters - n: {n_prime + 1}, k: {bch_code.k}, d: {adjusted_d}")
+        print(f"BCH parameters - n: {n}, k: {bch_code.k}, d: {adjusted_d}")
         return bch_code, Hg
 
     def robust_hash_function(self, key, seed):
@@ -137,27 +132,6 @@ class BchIbltConstruction1:
                     print(f"Decoding error at cell {i}: {e}")
         return data_items
 
-    def test_hash_function(self):
-        """
-        Test the robust hash function to ensure it produces consistent and uniformly distributed results.
-        """
-        test_keys = ["test1", "test2", "test3", "example data 1", "example data 2"]
-        hash_results = [self.multi_hash_function(key) for key in test_keys]
-        print(f"Hash results: {hash_results}")
-        return hash_results
 
 
-# Example usage
-if __name__ == "__main__":
-    r = 4  # Number of bits in each cell
-    d = 3  # Minimum distance
 
-    iblt = BchIbltConstruction1(r, d)
-    iblt.insert("example data 1")
-    iblt.insert("example data 2")
-    iblt.delete("example data 1")
-    entries = iblt.list_entries()
-    print(f"Entries in the IBLT: {entries}")
-
-    # Test the hash function
-    iblt.test_hash_function()
