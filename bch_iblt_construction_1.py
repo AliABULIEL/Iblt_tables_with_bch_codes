@@ -42,7 +42,7 @@ class BchIbltConstruction1:
         key_bytes = (str(key) + str(seed)).encode()
         hash_bytes = hashlib.sha256(key_bytes).digest()
         hash_value = int.from_bytes(hash_bytes, byteorder='big') % self.size
-        print(f"Hash for key '{key}' with seed {seed}: {hash_value}")
+        # print(f"Hash for key '{key}' with seed {seed}: {hash_value}")
         return hash_value
 
     def multi_hash_function(self, key, num_hashes=3):

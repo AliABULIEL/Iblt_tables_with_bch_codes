@@ -27,7 +27,7 @@ class BCHIBLTShell(cmd.Cmd):
         self.bch_iblt = bch_iblt
 
     def do_insert(self, arg):
-        'Insert data: INSERT data'
+        'Insert data: insert <data>'
         data = arg.strip()
         if data:
             self.bch_iblt.insert(data)
@@ -37,7 +37,7 @@ class BCHIBLTShell(cmd.Cmd):
             print("No data provided for insertion.")
 
     def do_delete(self, arg):
-        'Delete data: DELETE data'
+        'Delete data: delete <data>'
         data = arg.strip()
         if data:
             self.bch_iblt.delete(data)
@@ -47,18 +47,24 @@ class BCHIBLTShell(cmd.Cmd):
             print("No data provided for deletion.")
 
     def do_list(self, arg):
-        'List entries: LIST'
+        'List entries: list'
         entries = self.bch_iblt.list_entries()
         print(f"Entries in the IBLT: {entries}")
 
     def do_exit(self, arg):
-        'Exit the shell: EXIT'
+        'Exit the shell: exit'
         print("Exiting BCH IBLT shell.")
         return True
 
 if __name__ == '__main__':
     # Initialize argument parser
-    parser = argparse.ArgumentParser(description="Interactive BCH IBLT Shell")
+    parser = argparse.ArgumentParser(description="Interactive BCH IBLT Shell\n\n"
+                                                 "Interactive Commands:\n"
+                                                 "  insert <data>: Insert data into the IBLT.\n"
+                                                 "  delete <data>: Delete data from the IBLT.\n"
+                                                 "  list: List all entries in the IBLT.\n"
+                                                 "  exit: Exit the interactive shell.\n",
+                                     formatter_class=argparse.RawTextHelpFormatter)
 
     # Add arguments
     parser.add_argument("--type", type=int, choices=[1, 2, 3],

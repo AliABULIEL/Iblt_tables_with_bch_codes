@@ -64,34 +64,19 @@ The script automatically uses recommended `r` and `d` values based on the type o
 
 ### Examples Commands
 
-1.  Run the encode and decode test with BCH type 1:
+1. Test the IBLT functionality with bch type:
 
-bashCopy code
+`python unit_test_run.py --all --type <type number>`
 
-`python run.py --function encode_decode --type 1`
+2for run.py script:
+`python run.py --type <type number>`
+ after that you can use the interactive commands 
+ "Interactive Commands:"
+                 "  insert <data>: Insert data into the IBLT."
+                 "  delete <data>: Delete data from the IBLT."
+                 "  list: List all entries in the IBLT."
+                 "  exit: Exit the interactive shell.",
 
-2.  Insert data using BCH type 2 and custom `r` and `d`:
 
-bashCopy code
 
-`python run.py --function insert --type 2 --r 12 --d 4`
 
-3.  Run all tests for BCH type 3 with default parameters:
-
-bashCopy code
-
-`python run.py --all --type 3`
-
-4.  Test the IBLT functionality with BCH type 1:
-
-bashCopy code
-
-`python run.py --function iblt --type 1`
-
-5.  Run encode\_decode function with custom parameters for type 2:
-
-bashCopy code
-
-`python run.py --function encode_decode --type 2 --r 12 --d 4`
-
-These example commands demonstrate how to run the script with different configurations, showcasing the flexibility of the testing framework for IBLTs with BCH codes.

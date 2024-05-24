@@ -82,7 +82,7 @@ class BchIbltConstruction2:
         key_bytes = (str(key) + str(seed)).encode()
         hash_bytes = hashlib.sha256(key_bytes).digest()
         hash_value = int.from_bytes(hash_bytes, byteorder='big') % self.size
-        print(f"Hash for key '{key}' with seed {seed}: {hash_value}")
+        # print(f"Hash for key '{key}' with seed {seed}: {hash_value}")
         return hash_value
 
     def multi_hash_function(self, key, num_hashes=3):
@@ -126,10 +126,10 @@ class BchIbltConstruction2:
                 for i in range(0, len(decoded_data_binary), 8)
             )
             decoded_str = decoded_bytes.decode('utf-8', errors='ignore').rstrip('\x00')
-            return decoded_str if decoded_str else "Undecodable or no data"
+            return decoded_str if decoded_str else ""
         except Exception as e:
             print(f"Decoding error: {e}")
-            return "Undecodable or no data"
+            return ""
 
     def insert(self, data):
         encoded_data = self.encode_data(data)
