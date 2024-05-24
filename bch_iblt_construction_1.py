@@ -100,21 +100,18 @@ class BchIbltConstruction1:
         print(f"Failed to insert data '{data}': all hashed cells are occupied")
 
     def delete(self, data):
-        """
-        Delete data from the IBLT. Encodes the data, hashes it, and updates one relevant cell in the table.
-        """
-        if len(self.table) < 1:
-            raise ValueError("Table must have at least one row.")
-
         encoded_data = self.encode_data(data)
         data_hashes = self.multi_hash_function(data)
-        print(f"Deleting data '{data}' with encoded form: {encoded_data}")
+
+        # Resize encoded_data to match the size of table's row
+        encoded_data = np.resize(encoded_data, self.table.shape[1])
 
         for data_hash in data_hashes:
-            if np.any(self.table[data_hash]):
-                self.table[data_hash] = (self.table[data_hash] - encoded_data) % 2  # Assuming binary field
-                print(f"Deleted data '{data}' from table index {data_hash}")
-                return  # Ensure only one cell is updated
+            for i in range(self.size):
+                if np.array_equal(self.table[i], encoded_data):
+                    self.table[i] = (self.table[i] - encoded_data) % 2
+                    print(f"Data '{data}' deleted from table index {i}.")
+                    return  # Ensure only one cell is updated
         print(f"Failed to delete data '{data}': no matching cell found")
 
     def list_entries(self):
